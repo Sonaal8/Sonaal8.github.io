@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Detailed case study of an AI-assisted analytics request workflow using Monday.com, Cursor LLM, MCP, Databricks, historical analyst references, validation, and human review.">
+<title>Detailed Case Study | AI-Assisted Analytics Request Automation</title>
+<style>
+:root{--navy:#102a43;--ink:#172b4d;--text:#334e68;--muted:#627d98;--line:#d9e2ec;--bg:#f4f7fb;--white:#fff;--blue:#2563eb;--bluebg:#eaf2ff;--teal:#0f766e;--tealbg:#e6fffb;--amber:#92400e;--amberbg:#fff7e6;--red:#b42318;--redbg:#fff0ee;--purple:#6941c6;--purplebg:#f4f0ff;--shadow:0 12px 32px rgba(16,42,67,.07)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}.wrap{width:min(1160px,calc(100% - 40px));margin:auto}
+header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}header .wrap{height:62px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font-weight:850;color:var(--ink);letter-spacing:-.03em}.nav{display:flex;gap:17px;font-size:12px;font-weight:750}.nav a{color:var(--muted)}
+.hero{padding:66px 0 45px;background:radial-gradient(circle at 90% 8%,#dbeafe 0,transparent 30%),linear-gradient(135deg,#fff,#f2f7ff);border-bottom:1px solid var(--line)}.eyebrow,.kicker{font-size:11px;text-transform:uppercase;letter-spacing:.14em;font-weight:850;color:var(--blue)}h1,h2,h3,h4{color:var(--ink);line-height:1.18;letter-spacing:-.035em}h1{font-size:clamp(36px,5vw,60px);max-width:900px;margin:13px 0 18px}h2{font-size:clamp(26px,3vw,36px);margin:0 0 12px}h3{font-size:19px;margin:0 0 9px}h4{font-size:15px;margin:0 0 7px}.lead{font-size:19px;line-height:1.65;max-width:850px;color:#40566f}.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.pill{padding:5px 10px;border:1px solid #cbd9ea;border-radius:999px;background:#ffffffd9;font-size:12px;font-weight:750;color:#334e68}
+main{padding:42px 0 70px}section{margin-bottom:54px;scroll-margin-top:82px}.intro{max-width:830px;color:var(--muted);margin:0 0 23px}.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:21px;box-shadow:0 4px 18px rgba(16,42,67,.025)}.metric .label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--muted)}.metric .num{font-size:34px;letter-spacing:-.05em;font-weight:900;color:var(--ink);margin:7px 0}.metric .note{font-size:12px;color:var(--muted)}.callout{padding:16px 19px;border-left:4px solid var(--blue);background:var(--bluebg);border-radius:0 12px 12px 0;margin:18px 0}.callout.warn{border-color:#d97706;background:var(--amberbg)}.callout.good{border-color:var(--teal);background:var(--tealbg)}.callout.red{border-color:var(--red);background:var(--redbg)}.callout strong{color:var(--ink)}.sub{margin:25px 0 11px;color:var(--muted);font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.12em}
+.flow{display:flex;flex-direction:column;align-items:center;gap:0;margin:20px auto}.node{width:min(700px,100%);border:1px solid var(--line);background:#fff;border-radius:14px;padding:17px 20px;box-shadow:0 5px 16px rgba(16,42,67,.04)}.node .n-title{font-weight:850;color:var(--ink);font-size:16px}.node .n-body{font-size:13px;color:var(--muted);margin-top:4px}.node .n-tag{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:850;margin-bottom:5px;color:var(--blue)}.node.blue{border-color:#9dbcf8;background:#f8fbff}.node.teal{border-color:#8ddbd1;background:#f4fffd}.node.purple{border-color:#c9b8f4;background:#fbf9ff}.node.amber{border-color:#f4cc7d;background:#fffdf7}.arrow{height:34px;display:flex;align-items:center;justify-content:center;color:#7890a8;font-size:24px;line-height:1}.decision{width:min(500px,100%);padding:16px 24px;background:var(--amberbg);border:1px solid #f4cc7d;clip-path:polygon(7% 0,93% 0,100% 50%,93% 100%,7% 100%,0 50%);text-align:center;font-weight:850;color:#7a4b08}.branches{display:grid;grid-template-columns:1fr 1fr;gap:18px;width:min(850px,100%);margin:0 auto}.branch{display:flex;flex-direction:column;align-items:center}.branch-label{font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.08em;margin:0 0 7px}.branch-label.yes{color:var(--teal)}.branch-label.no{color:var(--red)}.branch .node{height:100%}.merge{height:32px;border-bottom:2px solid #c4d1df;width:min(850px,100%);margin:0 auto 8px}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff}table{width:100%;border-collapse:collapse;min-width:620px}th,td{text-align:left;padding:13px 15px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}th{background:#f8fafc;color:#52677d;text-transform:uppercase;letter-spacing:.07em;font-size:10px}tr:last-child td{border-bottom:0}td strong{color:var(--ink)}
+ul{padding-left:20px;margin:8px 0}li{margin:7px 0}li::marker{color:var(--blue)}.small{font-size:12px;color:var(--muted)}.quote{font-size:23px;line-height:1.4;font-weight:800;letter-spacing:-.025em;color:var(--ink)}.twoline{display:grid;grid-template-columns:155px 1fr 62px;align-items:center;gap:12px;margin:16px 0}.track{height:16px;border-radius:99px;background:#edf2f7;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#2563eb,#60a5fa);border-radius:99px}.fill.after{background:linear-gradient(90deg,#0f766e,#2dd4bf)}.barlabel{font-size:13px;font-weight:750}.barval{text-align:right;font-size:13px;font-weight:850;color:var(--ink)}
+.code{background:#0b1f33;color:#d7e5f5;border-radius:14px;padding:19px;overflow:auto;font:12px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre}.code .muted{color:#8ca6c0}.badge{display:inline-block;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.05em;background:var(--bluebg);color:var(--blue)}.badge.green{background:var(--tealbg);color:var(--teal)}.badge.amber{background:var(--amberbg);color:var(--amber)}
+footer{background:#102a43;color:#c7d5e4;padding:28px 0}footer strong{color:#fff}footer p{font-size:12px;margin:5px 0}
+@media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr 1fr}.nav{gap:10px}.nav a:nth-child(n+4){display:none}}
+@media(max-width:620px){.wrap{width:calc(100% - 28px)}.nav{display:none}.hero{padding:42px 0 30px}.g2,.g3,.g4{grid-template-columns:1fr}.branches{grid-template-columns:1fr}.twoline{grid-template-columns:105px 1fr 53px;gap:8px}.barlabel{font-size:11px}.quote{font-size:20px}}
+@media print{header{position:static}.nav{display:none}.hero{background:#fff}.card{box-shadow:none}section{break-inside:avoid}.node{box-shadow:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="brand">PROJECT CASE STUDY <span style="color:#2563eb">/ AI ANALYTICS</span></div><nav class="nav"><a href="#summary">Summary</a><a href="#architecture">Flowchart</a><a href="#decisions">Logic</a><a href="#impact">Impact</a><a href="#controls">Controls</a><a href="#roadmap">Roadmap</a></nav></div></header>
+
+<div class="hero"><div class="wrap">
+  <div class="eyebrow">AI automation · Analytics workflow · Human-in-the-loop</div>
+  <h1>From manual audience requests to AI-assisted analytics</h1>
+  <p class="lead">A detailed walkthrough of a workflow connecting Monday.com CRM requests, Cursor's LLM capabilities through MCP, Databricks query execution, and auditor review—using historical analyst work as reference context.</p>
+  <div class="pills"><span class="pill">Monday.com CRM</span><span class="pill">Cursor LLM</span><span class="pill">MCP</span><span class="pill">Databricks</span><span class="pill">SQL</span><span class="pill">Auditor approval</span></div>
+</div></div>
+
+<main class="wrap">
+<section id="summary">
+  <div class="kicker">01 / Executive summary</div><h2>What the project solves</h2>
+  <p class="intro">Audience-analysis requests arrive through a Monday.com CRM board. Traditionally, an analyst interprets the ticket, searches prior work for relevant logic, writes and executes SQL in Databricks, prepares the result, and returns it for audit. The automation connects these steps and uses an LLM to assist with repeatable work while keeping an auditor in the approval path.</p>
+  <div class="grid g3">
+    <article class="card"><h3>Before</h3><p>Request details, code examples, and past decisions are spread across historical tickets and analyst folders. Analysts repeatedly interpret requirements and reconstruct familiar query logic.</p></article>
+    <article class="card"><h3>Intervention</h3><p>Use the ticket as the trigger and source of request context; use Cursor's LLM and historical references to support interpretation and SQL work; use Databricks to retrieve results; return them to the ticket.</p></article>
+    <article class="card"><h3>After</h3><p>A connected, partially automated workflow prepares results for auditor review. Stakeholder communication remains gated by human validation.</p></article>
+  </div>
+  <div class="callout"><strong>Positioning:</strong> This is an AI-assisted workflow automation with human oversight—not a claim of fully autonomous analytics or a model trained from scratch.</div>
+</section>
+
+<section id="architecture">
+  <div class="kicker">02 / Detailed flowchart</div><h2>End-to-end workflow, step by step</h2>
+  <p class="intro">The diagram below shows the logical flow and the checks a robust implementation should include. The core connections reflect the described project; validation and exception paths are recommended design patterns to confirm against the actual implementation.</p>
+  <div class="flow">
+    <div class="node blue"><div class="n-tag">Trigger · Source system</div><div class="n-title">1. Monday.com CRM board receives an audience request</div><div class="n-body">The ticket contains the business question, audience criteria, requested output, and any supporting context supplied by the requester.</div></div>
+    <div class="arrow">↓</div>
+    <div class="node"><div class="n-tag">Intake</div><div class="n-title">2. Read ticket details and normalize the request</div><div class="n-body">Collect the request text and relevant fields. Identify the intended audience, filters, date range, output format, and any missing information. Keep the ticket identifier attached to the workflow for traceability.</div></div>
+    <div class="arrow">↓</div>
+    <div class="decision">Are the request details sufficient and unambiguous?</div>
+    <div class="branches">
+      <div class="branch"><div class="branch-label yes">Yes · Continue</div><div class="arrow">↓</div><div class="node teal"><div class="n-title">3A. Prepare request context</div><div class="n-body">Create a structured summary of the requested analysis and the constraints that the query must satisfy.</div></div></div>
+      <div class="branch"><div class="branch-label no">No · Pause</div><div class="arrow">↓</div><div class="node amber"><div class="n-title">3B. Clarify or route to analyst</div><div class="n-body">Do not guess at material business rules. Ask for missing criteria or flag the request for manual handling.</div></div></div>
+    </div>
+    <div class="arrow">↓</div>
+    <div class="node purple"><div class="n-tag">Context engineering</div><div class="n-title">4. Use Cursor LLM with historical references through the MCP-connected workflow</div><div class="n-body">Supply the current request plus relevant historical tickets, code, and basic request documentation. The LLM uses these materials as reference context to help identify known logic and draft the analytical approach. This is reference-based context, not necessarily fine-tuning.</div></div>
+    <div class="arrow">↓</div>
+    <div class="node"><div class="n-tag">Query generation</div><div class="n-title">5. Draft SQL and explain the intended logic</div><div class="n-body">The LLM proposes a query or adapts an established query pattern. The implementation should preserve business definitions, joins, date boundaries, filters, and expected output grain.</div></div>
+    <div class="arrow">↓</div>
+    <div class="decision">Does the query pass validation and access checks?</div>
+    <div class="branches">
+      <div class="branch"><div class="branch-label yes">Pass · Execute</div><div class="arrow">↓</div><div class="node teal"><div class="n-title">6A. Execute in Databricks</div><div class="n-body">Run the approved query using authorized credentials and return the result set and execution status.</div></div></div>
+      <div class="branch"><div class="branch-label no">Fail · Stop safely</div><div class="arrow">↓</div><div class="node amber"><div class="n-title">6B. Correct or escalate</div><div class="n-body">Capture the error, revise the query within defined limits, or send the ticket to an analyst. Do not silently post a failed or partial result as complete.</div></div></div>
+    </div>
+    <div class="arrow">↓</div>
+    <div class="node"><div class="n-tag">Result handling</div><div class="n-title">7. Check result status and package the output</div><div class="n-body">Confirm the query completed, the returned data is in the expected format, and the response contains enough context for review. Where relevant, include the query or logic summary, filters, time window, and limitations.</div></div>
+    <div class="arrow">↓</div>
+    <div class="node blue"><div class="n-tag">Write-back</div><div class="n-title">8. Post the response to the original Monday.com ticket</div><div class="n-body">Return the result and supporting notes to the request thread. Associate the output with the original ticket so the auditor can review it in context.</div></div>
+    <div class="arrow">↓</div>
+    <div class="decision">Does the auditor approve the result?</div>
+    <div class="branches">
+      <div class="branch"><div class="branch-label yes">Approved</div><div class="arrow">↓</div><div class="node teal"><div class="n-title">9A. Release to stakeholder</div><div class="n-body">The reviewed response can be shared through the agreed stakeholder process.</div></div></div>
+      <div class="branch"><div class="branch-label no">Needs changes</div><div class="arrow">↓</div><div class="node amber"><div class="n-title">9B. Return for correction</div><div class="n-body">Record the reason, correct the request interpretation or query, rerun if needed, and submit a revised result for review.</div></div></div>
+    </div>
+  </div>
+  <div class="callout warn"><strong>Implementation honesty:</strong> The auditor review and return-to-ticket steps are part of the described workflow. The explicit clarification, SQL validation, retry, and error-routing branches above describe the robust operating logic the system should follow; only claim these as implemented controls if they exist in your actual setup.</div>
+</section>
+
+<section id="decisions">
+  <div class="kicker">03 / What each component does</div><h2>Component responsibilities</h2>
+  <div class="tablewrap"><table><thead><tr><th>Component</th><th>Responsibility</th><th>Input</th><th>Output</th><th>Key consideration</th></tr></thead><tbody>
+    <tr><td><strong>Monday.com</strong></td><td>Request intake, ticket context, and response destination</td><td>Audience request and ticket metadata</td><td>Request payload; result comment or update</td><td>Maintain a stable ticket ID and clear status.</td></tr>
+    <tr><td><strong>Cursor LLM</strong></td><td>Interpret the request and assist with analytical logic and SQL drafting</td><td>Current request plus relevant references</td><td>Structured interpretation, query draft, explanation</td><td>LLM output is a proposal and needs appropriate checks.</td></tr>
+    <tr><td><strong>MCP</strong></td><td>Provide a structured way for the LLM-enabled environment to interact with connected tools</td><td>Tool call and arguments</td><td>Tool response or execution result</td><td>Limit available tools and permissions to the required scope.</td></tr>
+    <tr><td><strong>Historical reference folder</strong></td><td>Supply examples of prior requests and analytical logic</td><td>Tickets, code, basic request details</td><td>Relevant examples for contextual reuse</td><td>Historical logic may be stale or specific to an old request.</td></tr>
+    <tr><td><strong>Databricks</strong></td><td>Execute SQL against governed analytical data</td><td>Validated query and authorized access</td><td>Result set, status, errors</td><td>Respect access controls, query cost, data scope, and correctness.</td></tr>
+    <tr><td><strong>Auditor</strong></td><td>Validate the output before stakeholder delivery</td><td>Request, output, and available logic notes</td><td>Approve, reject, or request correction</td><td>Review should cover business meaning, not just query success.</td></tr>
+  </tbody></table></div>
+</section>
+
+<section>
+  <div class="kicker">04 / Historical knowledge strategy</div><h2>How two years of manual work can help the LLM</h2>
+  <p class="intro">The folder of prior tickets, code, and request information represents accumulated operational knowledge. It can help an LLM recognize repeated request patterns, but its usefulness depends on how the context is selected and checked.</p>
+  <div class="grid g2">
+    <article class="card"><h3>Reference material</h3><ul><li>Previous request tickets and their wording</li><li>Code or SQL associated with completed requests</li><li>Basic request information and supporting notes</li><li>Known filters, definitions, or query patterns where documented</li></ul></article>
+    <article class="card"><h3>Recommended use pattern</h3><ul><li>Find examples relevant to the current request rather than blindly reusing all history</li><li>Check whether table names, fields, definitions, and date logic remain valid</li><li>Prefer current, approved logic when historical examples conflict</li><li>Keep the generated query and assumptions visible to the reviewer</li></ul></article>
+  </div>
+  <div class="callout"><strong>Terminology:</strong> If the LLM receives files or snippets as prompt/context, call it reference-based context engineering. If a search layer retrieves relevant examples at runtime, it may be described as retrieval-augmented generation (RAG). Fine-tuning is a separate process that updates model weights.</div>
+</section>
+
+<section>
+  <div class="kicker">05 / Failure modes and recovery</div><h2>Designing for the cases that break automation</h2>
+  <p class="intro">A useful automation design explains what happens when a request is incomplete, a query fails, or the result does not look right. These are recommended controls to validate in the implementation.</p>
+  <div class="tablewrap"><table><thead><tr><th>Failure mode</th><th>Risk</th><th>Recommended response</th><th>Evidence to log</th></tr></thead><tbody>
+    <tr><td><strong>Ambiguous request</strong></td><td>The model invents missing filters or business definitions.</td><td>Ask a clarifying question or route to analyst review.</td><td>Missing field, clarification requested, ticket status.</td></tr>
+    <tr><td><strong>Irrelevant historical example</strong></td><td>Old logic is applied to a different population or objective.</td><td>Use history as reference, verify the current requirement, and expose assumptions.</td><td>Reference used, query version, reviewer comments.</td></tr>
+    <tr><td><strong>Invalid SQL</strong></td><td>Syntax, schema, or column errors prevent completion.</td><td>Capture the error; allow bounded correction or route to analyst.</td><td>Error class, retry count, final status.</td></tr>
+    <tr><td><strong>Query runs but logic is wrong</strong></td><td>A successful execution produces a misleading answer.</td><td>Check business definitions, joins, row grain, filters, and result plausibility.</td><td>Validation outcome, audit correction, query notes.</td></tr>
+    <tr><td><strong>Permission or data-scope issue</strong></td><td>Unauthorized or overly broad data access.</td><td>Use least-privilege credentials and approved data access; stop on permission failures.</td><td>Access result and sanitized error metadata.</td></tr>
+    <tr><td><strong>Write-back failure</strong></td><td>Result is computed but not visible in the request ticket.</td><td>Retry safely or mark the request as incomplete; avoid duplicate posts.</td><td>Ticket ID, write-back status, retry outcome.</td></tr>
+    <tr><td><strong>Auditor rejects result</strong></td><td>Incorrect or incomplete output reaches the stakeholder if review is bypassed.</td><td>Keep stakeholder release gated; correct and resubmit.</td><td>Rejection reason, correction, approval status.</td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="impact">
+  <div class="kicker">06 / Reported operational impact</div><h2>75% lower stated processing time per request</h2>
+  <p class="intro">Based on the supplied figures: 60 minutes manually, 15 minutes through the partially automated workflow, and approximately 100 requests per month.</p>
+  <div class="grid g4">
+    <article class="card metric"><div class="label">Manual baseline</div><div class="num">60 min</div><div class="note">Per request</div></article>
+    <article class="card metric"><div class="label">Workflow time</div><div class="num">15 min</div><div class="note">Per request</div></article>
+    <article class="card metric"><div class="label">Difference</div><div class="num">45 min</div><div class="note">Per request · 75% lower</div></article>
+    <article class="card metric"><div class="label">Volume</div><div class="num">100</div><div class="note">Requests per month</div></article>
+  </div>
+  <article class="card" style="margin-top:16px"><h3>Per-request time comparison</h3>
+    <div class="twoline"><div class="barlabel">Manual baseline</div><div class="track"><div class="fill" style="width:100%"></div></div><div class="barval">60 min</div></div>
+    <div class="twoline"><div class="barlabel">Automated flow</div><div class="track"><div class="fill after" style="width:25%"></div></div><div class="barval">15 min</div></div>
+    <p class="small">The automated workflow time is 25% of the baseline: (60 − 15) / 60 = 75% reduction.</p>
+  </article>
+  <div class="tablewrap" style="margin-top:16px"><table><thead><tr><th>Measure</th><th>Manual baseline</th><th>Automated workflow</th><th>Difference</th></tr></thead><tbody>
+    <tr><td>Time per request</td><td>60 min</td><td>15 min</td><td><strong>45 min</strong></td></tr>
+    <tr><td>At 100 requests/month</td><td>100 hours</td><td>25 hours</td><td><strong>75 hours/month</strong></td></tr>
+    <tr><td>Annualized if volume and times remain stable</td><td>1,200 hours</td><td>300 hours</td><td><strong>900 hours/year</strong></td></tr>
+  </tbody></table></div>
+  <div class="callout warn"><strong>Do not overclaim labor savings.</strong> The 75 hours/month is the arithmetic difference in the supplied processing-time measure. If the 60-minute baseline measures active analyst work but the 15-minute figure measures total elapsed workflow time, the comparison is not like-for-like. Measure analyst effort before and after—including audit, corrections, exceptions, and manual handoffs—before calling this “hours saved.”</div>
+</section>
+
+<section id="controls">
+  <div class="kicker">07 / Quality and governance</div><h2>Keep a human accountable for the final answer</h2>
+  <div class="grid g2">
+    <article class="card"><h3>Workflow controls described</h3><ul><li>Output is returned to the originating Monday.com ticket.</li><li>An auditor checks the output before stakeholder delivery.</li><li>Historical code and tickets are reference material, not assumed ground truth.</li></ul></article>
+    <article class="card"><h3>Controls to confirm or implement</h3><ul><li>Least-privilege access to Databricks and MCP tools</li><li>SQL allow-listing or other execution safety checks</li><li>Query timeouts, bounded retries, and clear failure statuses</li><li>Validation for date ranges, filters, result grain, and row counts</li><li>Audit trail for request ID, query version, result status, and reviewer outcome</li><li>Redaction of sensitive fields from logs and prompts where required</li></ul></article>
+  </div>
+  <div class="callout red"><strong>Security principle:</strong> An LLM-generated query should never receive broader permissions than the human or service account requires. Do not put credentials, secrets, or sensitive customer-level data into portfolio materials.</div>
+</section>
+
+<section>
+  <div class="kicker">08 / Measuring whether it works</div><h2>Suggested evaluation framework</h2>
+  <div class="tablewrap"><table><thead><tr><th>Metric</th><th>Definition</th><th>How to use it</th></tr></thead><tbody>
+    <tr><td><strong>Active analyst effort</strong></td><td>Human minutes per request including review and correction</td><td>Primary metric for labor productivity.</td></tr>
+    <tr><td><strong>End-to-end turnaround</strong></td><td>Ticket creation to auditor-ready result or approved response</td><td>Measures delivery speed experienced by requesters.</td></tr>
+    <tr><td><strong>First-pass acceptance</strong></td><td>Share of results accepted by auditor without material correction</td><td>Measures quality and rework.</td></tr>
+    <tr><td><strong>Automation completion rate</strong></td><td>Share of eligible requests completed without manual fallback</td><td>Shows coverage and reliability.</td></tr>
+    <tr><td><strong>Exception rate</strong></td><td>Share needing manual intervention for ambiguity, errors, or missing context</td><td>Highlights cases requiring better rules or reference material.</td></tr>
+    <tr><td><strong>Cost per completed request</strong></td><td>Labor and compute cost divided by successfully completed requests</td><td>Connects the workflow to unit economics.</td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="roadmap">
+  <div class="kicker">09 / Improvement roadmap</div><h2>How the workflow can mature</h2>
+  <div class="grid g3">
+    <article class="card"><span class="badge">Phase 1</span><h3 style="margin-top:12px">Instrument</h3><ul><li>Log timestamps at each stage</li><li>Separate machine duration from human effort</li><li>Capture auditor acceptance and correction reasons</li></ul></article>
+    <article class="card"><span class="badge green">Phase 2</span><h3 style="margin-top:12px">Harden</h3><ul><li>Validate SQL and data scope</li><li>Make retries bounded and observable</li><li>Use current approved logic and clarify ambiguous requests</li></ul></article>
+    <article class="card"><span class="badge amber">Phase 3</span><h3 style="margin-top:12px">Optimize</h3><ul><li>Group requests by complexity and repeatability</li><li>Improve retrieval of relevant historical examples</li><li>Scale only where quality and efficiency are demonstrated</li></ul></article>
+  </div>
+</section>
+
+<section>
+  <div class="kicker">Publication note</div><div class="callout warn"><strong>Before sharing externally:</strong> Confirm permission to disclose the workflow details. This page contains no production SQL, credentials, customer data, or internal screenshots. Any additional implementation specifics should be checked for confidentiality. The exception-handling and SQL-validation branches are presented as recommended design controls unless verified as implemented.</div>
+</section>
+</main>
+<footer><div class="wrap"><strong>AI-Assisted Analytics Request Automation</strong><p>Monday.com × Cursor LLM × MCP × Databricks · Detailed portfolio case study</p><p>Metrics are calculated from the supplied baseline and should be validated before being described as audited outcomes.</p></div></footer>
+</body>
+</html>
